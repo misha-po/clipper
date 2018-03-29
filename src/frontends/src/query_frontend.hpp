@@ -20,6 +20,7 @@
 #include <clipper/redis.hpp>
 
 #include <server_http.hpp>
+#include <server_https.hpp>
 
 using clipper::Feedback;
 using clipper::FeedbackAck;
@@ -34,6 +35,7 @@ using clipper::json::json_parse_error;
 using clipper::json::json_semantic_error;
 using clipper::redis::labels_to_str;
 using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
+using HttpsServer = SimpleWeb::Server<SimpleWeb::HTTPS>;
 
 namespace query_frontend {
 
@@ -67,7 +69,7 @@ const std::string UPDATE_JSON_SCHEMA = R"(
 )";
 
 void respond_http(std::string content, std::string message,
-                  std::shared_ptr<HttpServer::Response> response) {
+                  std::shared_ptr<HttpsServer::Response> response) {
   *response << "HTTP/1.1 " << message << "\r\nContent-Type: application/json"
             << "\r\nContent-Length: " << content.length() << "\r\n\r\n"
             << content;
@@ -121,7 +123,8 @@ template <class QP>
 class RequestHandler {
  public:
   RequestHandler(std::string address, int portno)
-      : server_(address, portno), query_processor_() {
+      : server_("server.crt", "server.key"), query_processor_() {
+    server_.config.port = portno;
     clipper::Config& conf = clipper::get_config();
     while (!redis_connection_.connect(conf.get_redis_address(),
                                       conf.get_redis_port())) {
@@ -138,9 +141,9 @@ class RequestHandler {
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    server_.add_endpoint(GET_METRICS, "GET",
-                         [](std::shared_ptr<HttpServer::Response> response,
-                            std::shared_ptr<HttpServer::Request> /*request*/) {
+    server_.resource[GET_METRICS]["GET"] = []
+			(std::shared_ptr<HttpsServer::Response> response,
+                            std::shared_ptr<HttpsServer::Request> /*request*/) {
                            clipper::metrics::MetricsRegistry& registry =
                                clipper::metrics::MetricsRegistry::get_metrics();
                            std::string metrics_report =
@@ -148,7 +151,7 @@ class RequestHandler {
                            clipper::log_info(LOGGING_TAG_QUERY_FRONTEND,
                                              "METRICS", metrics_report);
                            respond_http(metrics_report, "200 OK", response);
-                         });
+                         };
 
     clipper::redis::subscribe_to_application_changes(
         redis_subscriber_,
@@ -304,8 +307,8 @@ class RequestHandler {
 
     auto predict_fn = [this, name, input_type, policy, latency_slo_micros,
                        app_metrics](
-        std::shared_ptr<HttpServer::Response> response,
-        std::shared_ptr<HttpServer::Request> request) {
+        std::shared_ptr<HttpsServer::Response> response,
+        std::shared_ptr<HttpsServer::Request> request) {
       try {
         std::vector<std::string> models = get_linked_models_for_app(name);
         std::vector<VersionedModelId> versioned_models;
@@ -386,11 +389,11 @@ class RequestHandler {
       }
     };
     std::string predict_endpoint = "^/" + name + "/predict$";
-    server_.add_endpoint(predict_endpoint, "POST", predict_fn);
+    server_.resource[predict_endpoint]["POST"] = predict_fn;
 
     auto update_fn = [this, name, input_type, policy](
-        std::shared_ptr<HttpServer::Response> response,
-        std::shared_ptr<HttpServer::Request> request) {
+        std::shared_ptr<HttpsServer::Response> response,
+        std::shared_ptr<HttpsServer::Request> request) {
       try {
         std::vector<std::string> models = get_linked_models_for_app(name);
         std::vector<VersionedModelId> versioned_models;
@@ -423,7 +426,7 @@ class RequestHandler {
       }
     };
     std::string update_endpoint = "^/" + name + "/update$";
-    server_.add_endpoint(update_endpoint, "POST", update_fn);
+    server_.resource[update_endpoint]["POST"] = update_fn;
   }
 
   /**
@@ -583,7 +586,7 @@ class RequestHandler {
    */
   size_t num_applications() {
     // Subtract one to account for the /metrics endpoint
-    size_t count = server_.num_endpoints() - 1;
+    size_t count = server_.resource.size() - 1;
     assert(count % 2 == 0);
     return count / 2;
   }
@@ -596,7 +599,11 @@ class RequestHandler {
   }
 
  private:
-  HttpServer server_;
+  //union {
+//	  HttpServer http;
+//	  HttpsServer https;
+ // } server_;
+  HttpsServer server_;
   QP query_processor_;
   redox::Redox redis_connection_;
   redox::Subscriber redis_subscriber_;
