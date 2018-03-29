@@ -28,7 +28,7 @@ target_include_directories(clipper PUBLIC
     PRIVATE src)
 
 
-target_link_libraries(clipper boost folly zmqcpp redox pthread rapidjson spdlog base64 cqueue)
+target_link_libraries(clipper boost folly dl zmqcpp redox pthread rapidjson spdlog base64 cqueue glog boost_context event double-conversion)
 
 # This makes the project importable from the build directory
 export(TARGETS clipper FILE ClipperConfig.cmake)
