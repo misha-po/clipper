@@ -175,8 +175,7 @@ class RequestHandler {
           "Retrying in 1 second...");
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    server_.add_endpoint(
-        ADD_APPLICATION, "POST",
+    server_.resource[ADD_APPLICATION]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -195,9 +194,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        ADD_MODEL_LINKS, "POST",
+        };
+    server_.resource[ADD_MODEL_LINKS]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -216,9 +214,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        ADD_MODEL, "POST",
+        };
+    server_.resource[ADD_MODEL]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -237,9 +234,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        SET_MODEL_VERSION, "POST",
+        };
+    server_.resource[SET_MODEL_VERSION]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -258,9 +254,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_ALL_APPLICATIONS, "POST",
+        };
+    server_.resource[GET_ALL_APPLICATIONS]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -280,9 +275,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_APPLICATION, "POST",
+        };
+    server_.resource[GET_APPLICATION]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -301,9 +295,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_LINKED_MODELS, "POST",
+        };
+    server_.resource[GET_LINKED_MODELS]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -322,9 +315,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_ALL_MODELS, "POST",
+        };
+    server_.resource[GET_ALL_MODELS]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -343,9 +335,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_MODEL, "POST",
+        };
+    server_.resource[GET_MODEL]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -364,9 +355,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_ALL_CONTAINERS, "POST",
+        };
+    server_.resource[GET_ALL_CONTAINERS]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -385,9 +375,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_CONTAINER, "POST",
+        };
+    server_.resource[GET_CONTAINER]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -406,9 +395,8 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
-    server_.add_endpoint(
-        GET_SELECTION_STATE, "POST",
+        };
+    server_.resource[GET_SELECTION_STATE]["POST"] = 
         [this](std::shared_ptr<HttpServer::Response> response,
                std::shared_ptr<HttpServer::Request> request) {
           try {
@@ -425,7 +413,7 @@ class RequestHandler {
           } catch (const clipper::ManagementOperationError& e) {
             respond_http(e.what(), "400 Bad Request", response);
           }
-        });
+        };
   }
 
   ~RequestHandler() {
