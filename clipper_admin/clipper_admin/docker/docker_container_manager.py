@@ -198,17 +198,25 @@ class DockerContainerManager(ContainerManager):
             })
         if len(containers) < 1:
             logger.warning("No Clipper query frontend found.")
-            raise ClipperException(
-                "No Clipper query frontend to attach model container to")
-        query_frontend_hostname = containers[0].name
-        env_vars = {
-            "CLIPPER_MODEL_NAME": name,
-            "CLIPPER_MODEL_VERSION": version,
-            # NOTE: assumes this container being launched on same machine
-            # in same docker network as the query frontend
-            "CLIPPER_IP": query_frontend_hostname,
-            "CLIPPER_INPUT_TYPE": input_type,
-        }
+#            raise ClipperException(
+#                 "No Clipper query frontend to attach model container to")
+            env_vars = {
+                "CLIPPER_MODEL_NAME": name,
+                "CLIPPER_MODEL_VERSION": version,
+                # NOTE: assumes this container being launched on same machine
+                # in same docker network as the query frontend
+                "CLIPPER_INPUT_TYPE": input_type,
+            }
+        else:
+            query_frontend_hostname = containers[0].name
+            env_vars = {
+                "CLIPPER_MODEL_NAME": name,
+                "CLIPPER_MODEL_VERSION": version,
+                # NOTE: assumes this container being launched on same machine
+                # in same docker network as the query frontend
+                "CLIPPER_IP": query_frontend_hostname,
+                "CLIPPER_INPUT_TYPE": input_type,
+            }
 
         model_container_label = create_model_container_label(name, version)
         labels = self.common_labels.copy()
